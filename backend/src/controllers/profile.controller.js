@@ -1,8 +1,10 @@
 const User = require("../models/UserModel");
+const { calculateScore } = require("../utils/profileScore");
 
 exports.getProfile = async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
-  res.json(user);
+  const score = calculateScore(user.profile);
+  res.json({user, profileCompletion: score});
 };
 
 exports.updateProfile = async (req, res) => {
@@ -12,7 +14,9 @@ exports.updateProfile = async (req, res) => {
 
   await user.save();
 
-  res.json({ message: "Profile updated", profile: user.profile });
+  const score = calculateScore(user.profile);
+
+  res.json({ message: "Profile updated", profile: user.profile, profileCompletion: score });
 };
 
 
