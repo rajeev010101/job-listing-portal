@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema(
       companyDescription: String,
       location: String,
       website: String,
+
+
+      verification: {
+      isVerified: { type: Boolean, default: false },
+      documents: String, // optional upload later
+      verifiedAt: Date
+},
     },
   },
   { timestamps: true }
