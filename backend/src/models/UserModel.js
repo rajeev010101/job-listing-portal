@@ -27,12 +27,14 @@ const userSchema = new mongoose.Schema(
       website: String,
 
 
-      verification: {
+     
+    },
+
+    verification: {
       isVerified: { type: Boolean, default: false },
       documents: String, // optional upload later
       verifiedAt: Date
-},
-    },
+    }
   },
   { timestamps: true }
 );
