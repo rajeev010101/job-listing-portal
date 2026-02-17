@@ -43,3 +43,37 @@ exports.deleteJob = async (req, res) => {
 
   res.json({ message: "Job deleted" });
 };
+
+// job search with pagination
+
+exports.searchJobs = async (req, res) => {
+  const { q, location, minSalary, page = 1, limit = 10 } = req.query;
+
+  const query = {};
+
+  if (q) {
+    query.title = { $regex: q, $options: "i" };
+  }
+
+  if (location) {
+    query.location = { $regex: location, $options: "i" };
+  }
+
+  if (minSalary) {
+    query.salary = { $regex: minSalary };
+  }
+
+  const jobs = await Job.find(query)
+    .skip((page - 1) * limit)
+    .limit(Number(limit))
+    .sort({ createdAt: -1 });
+
+  const total = await Job.countDocuments(query);
+
+  res.json({
+    total,
+    page: Number(page),
+    results: jobs
+  });
+};
+

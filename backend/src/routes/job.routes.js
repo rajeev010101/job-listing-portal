@@ -4,6 +4,7 @@ const controller = require("../controllers/job.controller");
 const auth = require("../middlewares/auth.middleware");
 const employerOnly = require("../middlewares/employer.middleware");
 
+router.get("/search", controller.searchJobs);
 router.get("/", controller.getJobs);
 router.get("/:id", controller.getJob);
 

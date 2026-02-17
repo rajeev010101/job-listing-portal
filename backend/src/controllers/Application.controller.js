@@ -1,10 +1,12 @@
 const Application = require("../models/Application.model");
 const Job = require("../models/Job.model");
+const Notification = require("../models/notification.model"); // FIXED CASE
 
 exports.applyJob = async (req, res) => {
   const job = await Job.findById(req.params.jobId);
 
-  if (!job) return res.status(404).json({ error: "Job not found" });
+  if (!job)
+    return res.status(404).json({ error: "Job not found" });
 
   // prevent duplicate apply
   const existing = await Application.findOne({
@@ -18,6 +20,12 @@ exports.applyJob = async (req, res) => {
   const application = await Application.create({
     job: job._id,
     applicant: req.user.id
+  });
+
+  // 🔔 CREATE NOTIFICATION FOR EMPLOYER
+  await Notification.create({
+    user: job.employer,
+    message: "New applicant applied to your job"
   });
 
   res.json(application);
