@@ -10,8 +10,8 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ error: "Only employers allowed" });
 
   // SAFE nested check
-  if (!user.verification || user.verification.isVerified !== true)
-    return res.status(403).json({ error: "Employer not verified yet" });
+ if (!user.verification.isVerified)
+  return res.status(403).json({ error: "Employer not verified yet" });
 
   next();
 };

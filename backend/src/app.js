@@ -3,8 +3,15 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
+
+
 
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/profile", require("./routes/profile.routes"));
@@ -14,8 +21,7 @@ app.use("/api/jobs", require("./routes/job.routes"));
 app.use("/api/applications", require("./routes/Application.routes"));
 app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/notifications", require("./routes/notification.routes"));
-
-
+app.use("/api/verification", require("./routes/verification.routes"));
 
 
 

@@ -29,12 +29,19 @@ const userSchema = new mongoose.Schema(
 
      
     },
-
     verification: {
-      isVerified: { type: Boolean, default: false },
-      documents: String, // optional upload later
-      verifiedAt: Date
-    }
+    isVerified: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending"
+    },
+    requestedAt: Date,
+    verifiedAt: Date,
+    rejectedAt: Date,
+    rejectionReason: String
+}
+    
   },
   { timestamps: true }
 );

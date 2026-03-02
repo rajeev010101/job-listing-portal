@@ -1,28 +1,34 @@
 const User = require("../models/UserModel");
 
 exports.verifyEmployer = async (req, res) => {
-  console.log("VERIFY ROUTE HIT:", req.params.id);
-
   const employer = await User.findById(req.params.id);
 
-  if (!employer || employer.role !== "employer") {
+  if (!employer || employer.role !== "employer")
     return res.status(404).json({ error: "Employer not found" });
-  }
 
-  // ensure verification object exists
-  if (!employer.verification) {
-    employer.verification = {};
-  }
-
-  employer.verification.isVerified = true;
-  employer.verification.verifiedAt = new Date();
+  employer.verification = {
+    isVerified: true,
+    status: "approved",
+    verifiedAt: new Date()
+  };
 
   await employer.save();
 
-  console.log("UPDATED:", employer.verification);
+  res.json({ message: "Employer approved", verification: employer.verification });
+};
 
-  res.json({
-    message: "Employer verified",
-    verification: employer.verification
-  });
+
+exports.rejectEmployer = async (req, res) => {
+  const { reason } = req.body;
+
+  const employer = await User.findById(req.params.id);
+
+  employer.verification.status = "rejected";
+  employer.verification.rejectedAt = new Date();
+  employer.verification.rejectionReason = reason;
+  employer.verification.isVerified = false;
+
+  await employer.save();
+
+  res.json({ message: "Employer rejected" });
 };
