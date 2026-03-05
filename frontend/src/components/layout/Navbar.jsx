@@ -79,14 +79,14 @@ export default function Navbar() {
 
          <button
           onClick={logout}
-          className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 text-white"
+          className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 text-white"
         >
           Login
         </button>
 
         <button
           onClick={logout}
-          className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700 text-white"
+          className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 text-white"
         >
           Logout
         </button>
