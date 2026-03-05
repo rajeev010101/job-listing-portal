@@ -5,15 +5,7 @@ export default function Home() {
     <div className= "min-h-screen bg-pink-50 dark:bg-gray-950 text-black dark:text-white p-10 transition-all">
 
       {/* Navbar */}
-      <nav className="flex justify-between items-center px-10 py-6">
-        <h1 className="text-2xl font-bold">JobPortal</h1>
-        <div className="space-x-6">
-          <a href="/login" className="hover:text-blue-400">Login</a>
-          <a href="/register" className="bg-blue-600 px-5 py-2 rounded-lg hover:bg-blue-700">
-            Get Started
-          </a>
-        </div>
-      </nav>
+     
 
       {/* Hero */}
       <section className="flex flex-col items-center text-center mt-24 px-6">
