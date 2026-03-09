@@ -3,9 +3,10 @@ const router = express.Router();
 
 const auth = require("../middlewares/auth.middleware");
 const controller = require("../controllers/Application.controller");
+const upload = require("../middlewares/upload.middleware");
 
 // Apply job
-router.post("/:jobId", auth, controller.applyJob);
+router.post("/apply/:jobId", auth, upload.single("resume"), controller.applyJob);
 
 // Get my applications (jobseeker)
 router.get("/my", auth, controller.getMyApplications);

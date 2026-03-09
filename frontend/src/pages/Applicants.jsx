@@ -1,81 +1,184 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
 import { useParams } from "react-router-dom";
+import api from "../services/api";
 
 export default function Applicants() {
-  const { jobId } = useParams();
-  const [applications, setApplications] = useState([]);
 
-  const fetchApplicants = async () => {
-    const res = await api.get(`/applications/job/${jobId}`);
-    setApplications(res.data);
-  };
+const { jobId } = useParams();
 
-  useEffect(() => {
-    fetchApplicants();
-  }, []);
+const [applications,setApplications] = useState([]);
+const [loading,setLoading] = useState(true);
 
-  const updateStatus = async (appId, status) => {
-    await api.put(`/applications/${appId}/status`, { status });
-    fetchApplicants();
-  };
+const fetchApplicants = async () => {
 
-  return (
-    <div className="min-h-screen bg-gray-950 text-white p-10">
+try{
 
-      <h1 className="text-3xl font-bold mb-8">Applicants</h1>
+const res = await api.get(`/applications/job/${jobId}`);
 
-      {applications.length === 0 && (
-        <p className="text-gray-500">No applicants yet.</p>
-      )}
+setApplications(res.data);
 
-      <div className="space-y-6">
-        {applications.map((app) => (
-          <div
-            key={app._id}
-            className="bg-gray-900 p-6 rounded-xl border border-gray-800"
-          >
-            <h2 className="text-xl font-semibold">
-              {app.applicant?.name}
-            </h2>
-            <p className="text-gray-400">
-              {app.applicant?.email}
-            </p>
+}catch(err){
 
-            <p className="mt-2">
-              Status:{" "}
-              <span
-                className={`font-semibold ${
-                  app.status === "accepted"
-                    ? "text-green-400"
-                    : app.status === "rejected"
-                    ? "text-red-400"
-                    : "text-yellow-400"
-                }`}
-              >
-                {app.status}
-              </span>
-            </p>
+console.error(err);
 
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={() => updateStatus(app._id, "accepted")}
-                className="bg-green-600 px-4 py-2 rounded hover:bg-green-700"
-              >
-                Accept
-              </button>
+}finally{
+setLoading(false);
+}
 
-              <button
-                onClick={() => updateStatus(app._id, "rejected")}
-                className="bg-red-600 px-4 py-2 rounded hover:bg-red-700"
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+};
 
-    </div>
-  );
+useEffect(()=>{
+fetchApplicants();
+},[]);
+
+
+const updateStatus = async (applicationId, status) => {
+
+  await api.put(`/applications/${applicationId}/status`, {
+    status
+  });
+
+  fetchApplicants();
+};
+
+if(loading){
+return <p className="p-10">Loading applicants...</p>
+}
+
+
+return(
+
+<div className="min-h-screen bg-gray-100 dark:bg-gray-950 p-10 text-black dark:text-white">
+
+<h1 className="text-3xl font-bold mb-10">
+Applicants
+</h1>
+
+<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+{applications.map((app)=>(
+    
+<div
+key={app._id}
+className="bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-800 p-6"
+>
+
+{/* Applicant Header */}
+
+<div className="flex items-center gap-4 mb-4">
+
+<img
+src={app.applicant?.profile || "/avatar.png"}
+className="w-12 h-12 rounded-full"
+/>
+
+<div>
+
+<h2 className="font-semibold">
+{app.applicant?.name}
+</h2>
+
+<p className="text-gray-400 text-sm">
+{app.applicant?.email}
+</p>
+
+</div>
+
+</div>
+
+
+{/* Applicant Info */}
+
+<div className="text-sm text-gray-500 space-y-1 mb-4">
+
+<p>📞 {app.phone || "N/A"}</p>
+
+<p>💼 {app.experience || "Experience not provided"}</p>
+
+<p>🏢 {app.currentCompany || "No company listed"}</p>
+
+<p>💰 Expected: {app.expectedSalary || "Not mentioned"}</p>
+
+</div>
+
+
+{/* Skills */}
+
+{app.skills && (
+<div className="flex flex-wrap gap-2 mb-4">
+
+{app.skills.split(",").map((skill,index)=>(
+<span
+key={index}
+className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs"
+>
+{skill.trim()}
+</span>
+))}
+
+</div>
+)}
+
+
+{/* Resume */}
+
+{app.resume && (
+
+<a
+href={`http://localhost:5000/${app.resume}`}
+target="_blank"
+className="block text-center bg-gray-200 dark:bg-gray-800 py-2 rounded mb-4"
+>
+Download Resume
+</a>
+
+)}
+
+
+{/* Status */}
+
+<div className="flex justify-between items-center">
+
+<span
+className={`text-xs px-3 py-1 rounded-full ${
+app.status === "accepted"
+? "bg-green-500/20 text-green-500"
+: app.status === "rejected"
+? "bg-red-500/20 text-red-500"
+: "bg-yellow-500/20 text-yellow-500"
+}`}
+>
+{app.status}
+</span>
+
+<div className="flex gap-2">
+
+<button
+onClick={()=>updateStatus(app._id,"accepted")}
+className="bg-green-600 px-3 py-1 rounded text-sm"
+>
+Accept
+</button>
+
+<button
+onClick={()=>updateStatus(app._id,"rejected")}
+className="bg-red-600 px-3 py-1 rounded text-sm"
+>
+Reject
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+))}
+
+</div>
+
+</div>
+
+);
+
 }

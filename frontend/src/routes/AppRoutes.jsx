@@ -9,6 +9,7 @@ import Notifications from "../pages/Notifications";
 import CreateJob from "../pages/CreateJob";
 import ManageJobs from "../pages/ManageJobs";
 import Applicants from "../pages/Applicants";
+import ApplyJob from "../pages/ApplyJob";
 
 
 
@@ -31,7 +32,7 @@ export default function AppRoutes() {
         <Route path="/create-job" element={<CreateJob />} />
         <Route path="/manage-jobs" element={<ManageJobs />} />
         <Route path="/applicants/:jobId" element={<Applicants />} />
-        
+        <Route path="/apply/:jobId" element={<ApplyJob />} />
       </Routes>
    
   );

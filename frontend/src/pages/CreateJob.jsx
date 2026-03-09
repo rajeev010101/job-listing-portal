@@ -7,6 +7,7 @@ export default function CreateJob() {
 
   const [form, setForm] = useState({
     title: "",
+    companyName: "",
     description: "",
     qualifications: "",
     responsibilities: "",
@@ -17,6 +18,7 @@ export default function CreateJob() {
     type: "Full-time",
   });
 
+  const [logo, setLogo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,13 +32,26 @@ export default function CreateJob() {
     setError("");
 
     try {
-      await api.post("/jobs", {
-        ...form,
-        salaryNumber: Number(form.salaryNumber) || undefined,
+
+      const formData = new FormData();
+
+      Object.keys(form).forEach((key) => {
+        formData.append(key, form[key]);
+      });
+
+      if (logo) {
+        formData.append("logo", logo);
+      }
+
+      await api.post("/jobs", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       alert("Job created successfully!");
       navigate("/manage-jobs");
+
     } catch (err) {
       setError(err.response?.data?.error || "Failed to create job");
     } finally {
@@ -58,6 +73,23 @@ export default function CreateJob() {
         )}
 
         <form onSubmit={handleSubmit} className="grid gap-6">
+
+          {/* Company Name */}
+          <input
+            name="companyName"
+            placeholder="Company Name"
+            value={form.companyName}
+            onChange={handleChange}
+            required
+            className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700"
+          />
+
+          {/* Company Logo */}
+          <input
+            type="file"
+            onChange={(e) => setLogo(e.target.files[0])}
+            className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700"
+          />
 
           {/* Title */}
           <input

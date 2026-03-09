@@ -9,6 +9,7 @@ const Notification = require("../models/notification.model");
 // =============================
 exports.applyJob = async (req, res) => {
   try {
+
     const job = await Job.findById(req.params.jobId)
       .populate("employer");
 
@@ -28,17 +29,40 @@ exports.applyJob = async (req, res) => {
     if (existing)
       return res.status(400).json({ error: "Already applied to this job" });
 
+    // Resume upload
+    const resume = req.file ? req.file.path : null;
+
+    // Create application with form data
     const application = await Application.create({
       job: job._id,
       applicant: req.user.id,
+
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+
+      city: req.body.city,
+      country: req.body.country,
+
+      experience: req.body.experience,
+      currentCompany: req.body.currentCompany,
+
+      expectedSalary: req.body.expectedSalary,
+      noticePeriod: req.body.noticePeriod,
+
+      skills: req.body.skills,
+      coverLetter: req.body.coverLetter,
+
+      resume,
+
       status: "applied",
     });
 
     // Increase applicant count
-   await Job.updateOne(
-  { _id: job._id },
-  { $inc: { applicantsCount: 1 } }
-);
+    await Job.updateOne(
+      { _id: job._id },
+      { $inc: { applicantsCount: 1 } }
+    );
 
     const applicant = await User.findById(req.user.id);
 
@@ -58,8 +82,6 @@ exports.applyJob = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 // =============================
 // 2️⃣ Get My Applications (Jobseeker)

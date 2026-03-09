@@ -51,19 +51,11 @@ export default function Jobs() {
     fetchJobs();
   };
 
-  const handleApply = async (jobId) => {
-    if (!token) return navigate("/login");
+  const handleApply = (jobId) => {
+  if (!token) return navigate("/login");
 
-    try {
-      setApplyingId(jobId);
-      await api.post(`/applications/${jobId}`);
-      alert("Applied successfully!");
-    } catch (err) {
-      alert(err.response?.data?.error);
-    } finally {
-      setApplyingId(null);
-    }
-  };
+  navigate(`/apply/${jobId}`);
+};
 
   const toggleSave = (jobId) => {
     if (savedJobs.includes(jobId)) {
@@ -177,13 +169,11 @@ export default function Jobs() {
 
             {role === "jobseeker" ? (
               <button
-                onClick={() => handleApply(job._id)}
-                className="bg-green-600 w-full py-2 rounded"
-              >
-                {applyingId === job._id
-                  ? "Applying..."
-                  : "Apply Now"}
-              </button>
+  onClick={() => handleApply(job._id)}
+  className="bg-green-600 hover:bg-green-700 w-full py-2 rounded transition"
+>
+  Apply Now
+</button>
             ) : (
               <button
                 onClick={() =>

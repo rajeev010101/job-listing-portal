@@ -1,91 +1,217 @@
 const Job = require("../models/Job.model");
 
+
+// CREATE JOB
 exports.createJob = async (req, res) => {
-  const job = await Job.create({
-    ...req.body,
-    employer: req.user.id
-  });
+  try {
 
-  res.json(job);
-};
+    const logo = req.file ? req.file.path : undefined;
 
-exports.getJobs = async (req, res) => {
-  const jobs = await Job.find().populate("employer", "name verification");
-  res.json(jobs);
-};
+    const job = await Job.create({
+      ...req.body,
+      salaryNumber: req.body.salaryNumber
+        ? Number(req.body.salaryNumber)
+        : undefined,
+      companyLogo: logo,
+      employer: req.user.id
+    });
 
-exports.getJob = async (req, res) => {
-  const job = await Job.findById(req.params.id)
-    .populate("employer", "name verification");
+    res.status(201).json({
+      success: true,
+      message: "Job created successfully",
+      job
+    });
 
-  res.json(job);
-};
+  } catch (error) {
+    console.error(error);
 
-exports.updateJob = async (req, res) => {
-  const job = await Job.findById(req.params.id);
-
-  if (job.employer.toString() !== req.user.id)
-    return res.status(403).json({ error: "Not your job" });
-
-  Object.assign(job, req.body);
-  await job.save();
-
-  res.json(job);
-};
-
-exports.deleteJob = async (req, res) => {
-  const job = await Job.findById(req.params.id);
-
-  if (job.employer.toString() !== req.user.id)
-    return res.status(403).json({ error: "Not your job" });
-
-  await job.deleteOne();
-
-  res.json({ message: "Job deleted" });
-};
-
-// job search with pagination
-
-exports.searchJobs = async (req, res) => {
-  const {
-    q,
-    location,
-    minSalary,
-    maxSalary,
-    category,
-    sort = "newest",
-    page = 1,
-    limit = 10,
-  } = req.query;
-
-  const query = {};
-
-  if (q) query.title = { $regex: q, $options: "i" };
-  if (location) query.location = { $regex: location, $options: "i" };
-  if (category) query.category = category;
-
-  if (minSalary || maxSalary) {
-    query.salaryNumber = {};
-    if (minSalary) query.salaryNumber.$gte = Number(minSalary);
-    if (maxSalary) query.salaryNumber.$lte = Number(maxSalary);
+    res.status(500).json({
+      error: "Failed to create job",
+      details: error.message
+    });
   }
+};
 
-  let sortOption = { createdAt: -1 };
 
-  if (sort === "salary-high") sortOption = { salaryNumber: -1 };
-  if (sort === "salary-low") sortOption = { salaryNumber: 1 };
 
-  const jobs = await Job.find(query)
-    .populate("employer", "verification")
-    .sort(sortOption)
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
+// GET ALL JOBS
+exports.getJobs = async (req, res) => {
+  try {
 
-  const total = await Job.countDocuments(query);
+    const jobs = await Job.find()
+      .populate("employer", "name verification");
 
-  res.json({
-    total,
-    page: Number(page),
-    results: jobs,
-  });
+    res.json({
+      success: true,
+      total: jobs.length,
+      jobs
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to fetch jobs"
+    });
+  }
+};
+
+
+
+// GET SINGLE JOB
+exports.getJob = async (req, res) => {
+  try {
+
+    const job = await Job.findById(req.params.id)
+      .populate("employer", "name verification");
+
+    if (!job) {
+      return res.status(404).json({
+        error: "Job not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      job
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to fetch job"
+    });
+  }
+};
+
+
+
+// UPDATE JOB
+exports.updateJob = async (req, res) => {
+  try {
+
+    const job = await Job.findById(req.params.id);
+
+    if (!job)
+      return res.status(404).json({ error: "Job not found" });
+
+    if (job.employer.toString() !== req.user.id)
+      return res.status(403).json({ error: "Not your job" });
+
+    const logo = req.file ? req.file.path : undefined;
+
+    Object.assign(job, req.body);
+
+    if (logo) {
+      job.companyLogo = logo;
+    }
+
+    await job.save();
+
+    res.json({
+      success: true,
+      message: "Job updated successfully",
+      job
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to update job"
+    });
+  }
+};
+
+
+
+// DELETE JOB
+exports.deleteJob = async (req, res) => {
+  try {
+
+    const job = await Job.findById(req.params.id);
+
+    if (!job)
+      return res.status(404).json({ error: "Job not found" });
+
+    if (job.employer.toString() !== req.user.id)
+      return res.status(403).json({ error: "Not your job" });
+
+    await job.deleteOne();
+
+    res.json({
+      success: true,
+      message: "Job deleted"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to delete job"
+    });
+  }
+};
+
+
+
+// JOB SEARCH WITH PAGINATION
+exports.searchJobs = async (req, res) => {
+  try {
+
+    const {
+      q,
+      location,
+      minSalary,
+      maxSalary,
+      category,
+      sort = "newest",
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    const query = {};
+
+    if (q) query.title = { $regex: q, $options: "i" };
+
+    if (location)
+      query.location = { $regex: location, $options: "i" };
+
+    if (category)
+      query.category = category;
+
+    if (minSalary || maxSalary) {
+      query.salaryNumber = {};
+      if (minSalary)
+        query.salaryNumber.$gte = Number(minSalary);
+
+      if (maxSalary)
+        query.salaryNumber.$lte = Number(maxSalary);
+    }
+
+    let sortOption = { createdAt: -1 };
+
+    if (sort === "salary-high")
+      sortOption = { salaryNumber: -1 };
+
+    if (sort === "salary-low")
+      sortOption = { salaryNumber: 1 };
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    const jobs = await Job.find(query)
+      .populate("employer", "verification name")
+      .sort(sortOption)
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
+
+    const total = await Job.countDocuments(query);
+
+    res.json({
+      success: true,
+      total,
+      page: pageNumber,
+      totalPages: Math.ceil(total / limitNumber),
+      results: jobs,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: "Job search failed"
+    });
+  }
 };
