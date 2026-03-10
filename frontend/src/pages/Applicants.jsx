@@ -68,8 +68,12 @@ className="bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200
 <div className="flex items-center gap-4 mb-4">
 
 <img
-src={app.applicant?.profile || "/avatar.png"}
-className="w-12 h-12 rounded-full"
+src={
+app.applicant?.profile?.avatar
+? `http://localhost:5000/${app.applicant.profile.avatar}`
+: `https://ui-avatars.com/api/?name=${app.applicant?.name}`
+}
+className="w-12 h-12 rounded-full object-cover"
 />
 
 <div>

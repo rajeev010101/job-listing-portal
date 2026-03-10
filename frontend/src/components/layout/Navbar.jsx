@@ -1,108 +1,151 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
-  const navigate = useNavigate();
 
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+const navigate = useNavigate();
+const location = useLocation();
 
-  const role = localStorage.getItem("role");
+const role = localStorage.getItem("role");
+const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    const root = document.documentElement;
+const [theme,setTheme] = useState(localStorage.getItem("theme") || "light");
 
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+useEffect(()=>{
 
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+document.documentElement.classList.toggle("dark", theme==="dark");
+localStorage.setItem("theme",theme);
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
+},[theme]);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setIsLoggedIn(false);
-    navigate("/login");
-  };
 
-  return (
-    <nav className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 text-black dark:text-white px-8 py-4 flex justify-between items-center transition-all duration-300">
+const logout = ()=>{
 
-      {/* Logo */}
-      <Link
-        to="/"
-        className="text-2xl font-bold text-blue-600 dark:text-blue-500"
-      >
-        HireHub
-      </Link>
+localStorage.clear();
+navigate("/login");
 
-      <div className="flex items-center gap-6 text-gray-700 dark:text-gray-300">
+};
 
-        <Link to="/jobs" className="hover:text-black dark:hover:text-white">
-          Jobs
-        </Link>
 
-        {role === "employer" && isLoggedIn && (
-          <>
-            <Link to="/create-job" className="hover:text-black dark:hover:text-white">
-              Post Job
-            </Link>
+const linkClass = (path)=>
+`px-4 py-2 rounded-lg text-sm font-medium transition
+${location.pathname===path
+? "bg-blue-600 text-white"
+: "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
+}`;
 
-            <Link to="/manage-jobs" className="hover:text-black dark:hover:text-white">
-              Manage
-            </Link>
-          </>
-        )}
 
-        {isLoggedIn && (
-          <>
-            <Link to="/dashboard" className="hover:text-black dark:hover:text-white">
-              Dashboard
-            </Link>
+return(
 
-            <Link to="/profile" className="hover:text-black dark:hover:text-white">
-              My Profile
-            </Link>
+<nav className="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
 
-            <Link to="/notifications" className="hover:text-black dark:hover:text-white">
-              Notifications
-            </Link>
-          </>
-        )}
+<div className="max-w-7xl mx-auto px-6">
 
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:opacity-80 transition"
-        >
-          {theme === "dark" ? "Light" : "Dark"}
-        </button>
+<div className="flex items-center justify-between h-16">
 
-        {/* Login / Logout Button */}
-        {isLoggedIn ? (
-          <button
-            onClick={logout}
-            className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 text-white"
-          >
-            Logout
-          </button>
-        ) : (
-          <button
-            onClick={() => navigate("/login")}
-            className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 text-white"
-          >
-            Login
-          </button>
-        )}
 
-      </div>
-    </nav>
-  );
+{/* LOGO */}
+
+<Link to="/" className="flex items-center gap-3">
+
+<div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+
+H
+
+</div>
+
+<span className="font-bold text-lg text-gray-900 dark:text-white">
+
+Hire Hub
+
+</span>
+
+</Link>
+
+
+{/* NAV LINKS */}
+
+<div className="hidden md:flex items-center gap-3">
+
+<Link to="/jobs" className={linkClass("/jobs")}>
+Jobs
+</Link>
+
+<Link to="/dashboard" className={linkClass("/dashboard")}>
+Dashboard
+</Link>
+
+<Link to="/notifications" className={linkClass("/notifications")}>
+Notifications
+</Link>
+
+<Link to="/profile" className={linkClass("/profile")}>
+Profile
+</Link>
+
+</div>
+
+
+{/* RIGHT SECTION */}
+
+<div className="flex items-center gap-3">
+
+
+{/* THEME TOGGLE */}
+
+<button
+
+onClick={()=>setTheme(theme==="dark"?"light":"dark")}
+
+className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800"
+
+>
+
+{theme==="dark" ? "☀️" : "🌙"}
+
+</button>
+
+
+{/* AUTH BUTTONS */}
+
+{token ? (
+
+<button
+
+onClick={logout}
+
+className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm"
+
+>
+
+Logout
+
+</button>
+
+) : (
+
+<Link
+
+to="/login"
+
+className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+
+>
+
+Login
+
+</Link>
+
+)}
+
+</div>
+
+</div>
+
+</div>
+
+</nav>
+
+);
+
 }
